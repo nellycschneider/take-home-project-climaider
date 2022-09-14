@@ -4,18 +4,18 @@ import { v4 as uuidv4 } from 'uuid'
 import { doc, setDoc, onSnapshot } from '@firebase/firestore'
 import { Root, Container, ChatBubble, PlayerSection } from './styles'
 
-type Player = {
+type User = {
 	id: string;
 	name: string;
 }
 
 type Message = {
-	player: Player;
+	user: User;
 	timestamp: number;
 	message: string;
 }
-interface ChatProps {
-  	players: Array<Player>;
+interface ChatSectionProps {
+  	players: Array<User>;
 }
 
 
@@ -66,31 +66,32 @@ const Player = ({ id, }: { id: string }) => {
 	)
 }
 
-const Chat = (props: ChatProps): JSX.Element => {
+const Chat = (props: ChatSectionProps): JSX.Element => {
 	// TODO: Implement snapshot listeners on player 1 and player2. Display a chat of their messages.
 	// https://firebase.google.com/docs/firestore/query-data/listen for snapshot documentation.
 	// i have disabled all security, so you should not worry about that :)
 
-	const [allMessages, setAllMessages,] = useState<Array<Message>>([])
+	const [messageList, setMessageList,] = useState<Array<Message>>([])
 
 	useEffect(() => {
-		props?.players?.map((user: Player) => {
+		props?.players?.map((user: User) => {
 			const unsubscribe = onSnapshot(
 				doc(db, `users/${user.id}`),
 				(document) => {
-					setAllMessages((message) => {
+					setMessageList((message) => {
 						const data = document?.data()
+						const messageData = data?.messages
 						if (data) {
-							const newMessages = Object.keys(data?.messages).map(
+							const newMessages = Object.keys(messageData).map(
 								(timestamp) => {
 									return {
-										player: user,
+										user,
 										timestamp: Number(timestamp),
-										message: data?.messages[timestamp],
+										message: messageData[timestamp],
 									}
 								}
 							)
-							return [...message, newMessages[newMessages.length - 1],]
+							return [...message, newMessages[newMessages.length -1],]
 						} else {
 							return message
 						}
@@ -107,9 +108,9 @@ const Chat = (props: ChatProps): JSX.Element => {
 
 	return (
 		<ChatBubble>
-			{allMessages.map((message: Message, index: number) => {
+			{messageList.map((message: Message, index: number) => {
 
-				const userName = message?.player?.name
+				const userName = message?.user?.name
 				const userMessage = message?.message
 
 				return (
