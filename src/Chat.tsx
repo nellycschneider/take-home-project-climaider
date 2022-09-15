@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import React, { useEffect, useState } from 'react'
 import { db } from './firestore'
 import { doc, onSnapshot } from '@firebase/firestore'
@@ -17,7 +18,7 @@ const Chat = (props: ChatSectionProps): JSX.Element => {
     props?.users?.map((user: User) => {
     	const unsubscribe = onSnapshot(
     		doc(db, `users/${user.id}`),
-    		(document) => {
+    		(document) => {                
     			setMessageList((message) => {
     				const data = document?.data()
     				const messageData = data?.messages
@@ -49,6 +50,7 @@ const Chat = (props: ChatSectionProps): JSX.Element => {
 				return (
 					<div
 						className={`bubble ${userName === 'Joachim' ? 'blue' : 'orange'}`}
+						key={index}
 					>
 						<ul key={index}>
 							<div className="chat-header">
